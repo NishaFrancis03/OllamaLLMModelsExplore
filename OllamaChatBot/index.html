@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        #chat-box {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #e0e0e0;
+        }
+        .user-message {
+            background-color: #b3e5fc;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #c8e6c9;
+        }
+        #user-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-box">
+        <h2>Chat with Bot</h2>
+        <div id="messages"></div>
+        <input type="text" id="user-input" placeholder="Type a message..." />
+        <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+        document.getElementById("send-btn").addEventListener("click", async function() {
+            let userInput = document.getElementById("user-input").value;
+            if (userInput.trim() === "") return;
+
+            // Display user message
+            let userMessageDiv = document.createElement("div");
+            userMessageDiv.classList.add("message", "user-message");
+            userMessageDiv.textContent = userInput;
+            document.getElementById("messages").appendChild(userMessageDiv);
+
+            // Send user message to the FastAPI backend
+            let response = await fetch('http://127.0.0.1:8000/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "user_input": userInput })
+            });
+            let data = await response.json();
+
+            // Display bot response
+            let botMessageDiv = document.createElement("div");
+            botMessageDiv.classList.add("message", "bot-message");
+            botMessageDiv.textContent = data.response;
+            document.getElementById("messages").appendChild(botMessageDiv);
+
+            // Clear user input field
+            document.getElementById("user-input").value = "";
+
+            // Scroll to the bottom of the chat box
+            document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+        });
+    </script>
+</body>
+</html>
